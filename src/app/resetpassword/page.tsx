@@ -1,25 +1,26 @@
 'use client';
-import Link from 'next/link';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-export default function LoginPage() {
+
+export default function ResetPasswordPage() {
   const router = useRouter();
+  const [token, setToken] = useState('');
   const [user, setUser] = useState({
-    email: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [isDisabled, setIsDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const onLogin = async () => {
-    setLoading(true);
+  const changePassword = async () => {
     try {
-      const res = await axios.post('/api/users/login', user);
-      toast.success('Login success');
-      router.push('/profile');
+      const res = await axios.post('/api/users/resetpassword', { token: token, password: user.password });
+      toast.success('Password reset success');
+      router.push('/login');
     } catch (error: any) {
       toast.error(error.response.data.message);
     } finally {
@@ -28,7 +29,12 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (user.email.length > 0 && user.password.length > 0) {
+    const urlToken = window.location.search.split('=')[1];
+    setToken(urlToken);
+  }, []);
+
+  useEffect(() => {
+    if (user.password.length > 0 && user.password === user.confirmPassword) {
       setIsDisabled(false);
     } else {
       setIsDisabled(true);
@@ -38,16 +44,6 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <h1>{loading ? 'Logging...' : 'Login'}</h1>
-      <label htmlFor="email">Email</label>
-      <input
-        type="email"
-        name="email"
-        id="email"
-        placeholder="Your Email"
-        value={user.email}
-        onChange={(e) => setUser({ ...user, email: e.target.value })}
-        className="p-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-500 text-black"
-      />
       <label htmlFor="password">Password</label>
       <input
         type="password"
@@ -58,18 +54,26 @@ export default function LoginPage() {
         onChange={(e) => setUser({ ...user, password: e.target.value })}
         className="p-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-500 text-black"
       />
+      <label htmlFor="confirmPassword">Password</label>
+      <input
+        type="password"
+        name="confirmPassword"
+        id="confirmPassword"
+        placeholder="Confirm Your Password"
+        value={user.confirmPassword}
+        onChange={(e) => setUser({ ...user, confirmPassword: e.target.value })}
+        className="p-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-500 text-black"
+      />
 
       <button
-        onClick={onLogin}
+        onClick={changePassword}
         className={`px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600 ${
           isDisabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
         disabled={isDisabled}
       >
-        Log in
+        Change Password
       </button>
-
-      <Link href="/signup"> Sign up </Link>
     </div>
   );
 }

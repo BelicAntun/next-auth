@@ -11,8 +11,6 @@ export async function POST(req: NextRequest) {
     const reqBody = await req.json();
     const { username, email, password } = reqBody;
 
-    console.log(reqBody);
-
     //check if user already exists
     const user = await User.findOne({ email: email });
 
@@ -33,8 +31,6 @@ export async function POST(req: NextRequest) {
     });
 
     const savedUser = await newUser.save();
-
-    console.log(savedUser);
 
     //send email
 
